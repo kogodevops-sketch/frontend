@@ -1,1 +1,22 @@
+# Dependencies
 /node_modules
+
+# Build output
+/dist
+/tmp
+/out-tsc
+
+# Angular / build caches
+/.angular/cache
+.sass-cache
+
+# IDE / editor
+/.idea
+/.vscode
+
+# Logs
+*.log
+npm-debug.log*
+
+# System
+.DS_Store
