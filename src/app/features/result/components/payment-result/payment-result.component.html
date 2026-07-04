@@ -1,0 +1,94 @@
+<!-- src/app/features/result/components/payment-result/payment-result.component.html -->
+<div class="result-page">
+  <div class="result-card">
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="result-loading" aria-label="Loading payment result">
+        <div class="spinner"></div>
+        <p>Retrieving payment result…</p>
+      </div>
+    }
+
+    <!-- Fetch error -->
+    @if (!isLoading() && fetchError()) {
+      <div class="result-icon result-icon--error">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="result-title result-title--error">Unable to load result</h1>
+      <p class="result-desc">{{ fetchError() }}</p>
+      <button class="btn btn-secondary" (click)="goBackToPayment()">Return to payment</button>
+    }
+
+    <!-- Success -->
+    @if (!isLoading() && !fetchError() && isSuccess()) {
+      <div class="result-icon result-icon--success">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="result-title result-title--success">Payment successful</h1>
+      <p class="result-desc">Your transaction has been authorised.</p>
+
+      <div class="result-details">
+        <div class="detail-row">
+          <span class="detail-label">Transaction ID</span>
+          <span class="detail-value detail-value--mono">{{ result()?.transactionId }}</span>
+        </div>
+        @if (result()?.maskedPan) {
+          <div class="detail-row">
+            <span class="detail-label">Card</span>
+            <span class="detail-value">{{ result()?.maskedPan }}</span>
+          </div>
+        }
+        @if (result()?.paymentType) {
+          <div class="detail-row">
+            <span class="detail-label">Payment type</span>
+            <span class="detail-value">{{ result()?.paymentType }}</span>
+          </div>
+        }
+        @if (result()?.authCode) {
+          <div class="detail-row">
+            <span class="detail-label">Auth code</span>
+            <span class="detail-value detail-value--mono">{{ result()?.authCode }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Failure -->
+    @if (!isLoading() && !fetchError() && !isSuccess()) {
+      <div class="result-icon result-icon--error">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="result-title result-title--error">Payment failed</h1>
+      <p class="result-desc">
+        {{ result()?.errorMessage || 'Your payment could not be processed.' }}
+      </p>
+
+      @if (result()?.errorCode) {
+        <div class="result-details">
+          <div class="detail-row">
+            <span class="detail-label">Error code</span>
+            <span class="detail-value detail-value--mono">{{ result()?.errorCode }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Transaction ID</span>
+            <span class="detail-value detail-value--mono">{{ result()?.transactionId }}</span>
+          </div>
+        </div>
+      }
+
+      <button class="btn btn-primary" (click)="goBackToPayment()">Try again</button>
+    }
+
+  </div>
+</div>
