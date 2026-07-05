@@ -22,6 +22,59 @@
     </div>
 
 
+    <!-- Payment outcome banner — shown after returning from Trust Payments -->
+    @if (paidSuccess()) {
+      <div class="outcome-banner outcome-banner--success" role="status">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="#16a34a" stroke-width="1.5"/>
+          <path d="M8 12.5l2.5 2.5 5.5-5.5" stroke="#16a34a" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <p class="outcome-title">Payment successful</p>
+          <p class="outcome-desc">Your transaction has been authorised.</p>
+        </div>
+      </div>
+
+      <div class="result-details">
+        <div class="detail-row">
+          <span class="detail-label">Transaction ID</span>
+          <span class="detail-value detail-value--mono">{{ outcome()?.transactionId }}</span>
+        </div>
+        @if (outcome()?.maskedPan) {
+          <div class="detail-row">
+            <span class="detail-label">Card</span>
+            <span class="detail-value">{{ outcome()?.maskedPan }}</span>
+          </div>
+        }
+        @if (outcome()?.authCode) {
+          <div class="detail-row">
+            <span class="detail-label">Auth code</span>
+            <span class="detail-value detail-value--mono">{{ outcome()?.authCode }}</span>
+          </div>
+        }
+      </div>
+
+      <button class="btn btn-primary" (click)="startNewPayment()" type="button">
+        Make another payment
+      </button>
+    }
+
+    @if (paidFailure()) {
+      <div class="outcome-banner outcome-banner--error" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="#dc2626" stroke-width="1.5"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <p class="outcome-title">Payment failed</p>
+          <p class="outcome-desc">
+            {{ outcome()?.errorMessage || 'Your payment could not be processed. Please try again below.' }}
+          </p>
+        </div>
+      </div>
+    }
+
     <!-- Error state -->
     @if (hasError()) {
       <div class="error-banner" role="alert">
@@ -39,6 +92,7 @@
       </button>
     }
 
+    @if (showForm()) {
     <!-- Loading JWT / st.js skeleton -->
     @if (isLoading() && !isFormRendered()) {
       <div class="skeleton-wrapper" aria-label="Loading payment form">
@@ -102,6 +156,7 @@
         Card details are never sent to our servers.
       </p>
     </div>
+    }
 
   </div>
 </div>

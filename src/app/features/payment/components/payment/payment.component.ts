@@ -8,11 +8,11 @@ import {
   computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PaymentApiService } from '../../services/payment-api.service';
 import { TrustPaymentsLoaderService } from '../../services/trustpayments-loader.service';
-import { PaymentStatus } from '../../../../shared/models/payment.models';
+import { PaymentStatus, PaymentResultResponse } from '../../../../shared/models/payment.models';
 import { environment } from '../../../../../environments/environment';
 
 // Extend Window to include SecureTrading from st.js
@@ -62,12 +62,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private readonly paymentApiService = inject(PaymentApiService);
   private readonly loaderService = inject(TrustPaymentsLoaderService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   // Reactive state
   readonly status = signal<PaymentStatus>('IDLE');
   readonly errorMessage = signal<string | null>(null);
   readonly isFormValid = signal<boolean>(false);
   readonly isFormRendered = signal<boolean>(false);
+
+  // Payment outcome shown inline after returning from Trust Payments (via /callback redirect)
+  readonly outcome = signal<PaymentResultResponse | null>(null);
 
   // Computed flags for template clarity
   readonly isLoading = computed(() =>
@@ -76,13 +80,58 @@ export class PaymentComponent implements OnInit, OnDestroy {
   readonly isReady = computed(() => this.status() === 'READY');
   readonly hasError = computed(() => this.status() === 'ERROR');
 
+  // Outcome flags
+  readonly paidSuccess = computed(() => this.outcome()?.status === 'SUCCESS');
+  readonly paidFailure = computed(() => this.outcome()?.status === 'FAILED');
+  // Show the card form unless the payment already succeeded on this page load
+  readonly showForm = computed(() => !this.paidSuccess());
+
   // Stored transactionId for routing to result page
   private transactionId: string | null = null;
 
   readonly paymentConfig = PAYMENT_CONFIG;
 
   async ngOnInit(): Promise<void> {
-    await this.initialisePaymentForm();
+    // If we've been redirected back from /callback, the URL carries the transactionId.
+    // Load its outcome and show an inline banner instead of a fresh (empty) form.
+    const returnedTxnId = this.route.snapshot.queryParamMap.get('transactionId');
+    if (returnedTxnId) {
+      await this.loadOutcome(returnedTxnId);
+    } else {
+      await this.initialisePaymentForm();
+    }
+  }
+
+  /**
+   * Called when the browser returns from Trust Payments (via the backend /callback
+   * 302 redirect). Fetches the stored result and shows a success/failure banner.
+   * On failure we also re-initialise a fresh form so the user can retry.
+   */
+  private async loadOutcome(transactionId: string): Promise<void> {
+    this.status.set('LOADING_JWT');
+    try {
+      const result = await this.paymentApiService
+        .getTransactionResult(transactionId)
+        .toPromise() as PaymentResultResponse;
+
+      this.outcome.set(result);
+      this.status.set('IDLE');
+
+      // Failed payment → let them try again with a fresh card form below the banner.
+      if (result.status !== 'SUCCESS') {
+        await this.initialisePaymentForm();
+      }
+    } catch (error) {
+      this.handleInitError(error);
+    }
+  }
+
+  /**
+   * Starts a brand-new payment after a completed one — clean reload of the payment
+   * page (drops the ?transactionId query param and re-initialises st.js fresh).
+   */
+  startNewPayment(): void {
+    window.location.href = '/payment';
   }
 
   ngOnDestroy(): void {

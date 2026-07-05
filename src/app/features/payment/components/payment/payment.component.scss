@@ -307,6 +307,79 @@
   margin: 0;
 }
 
+// ─── Payment outcome banner ─────────────────────────────────────────────────────
+.outcome-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 0.875rem;
+
+  svg { flex-shrink: 0; margin-top: 1px; }
+
+  &--success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+  }
+
+  &--error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+  }
+}
+
+.outcome-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+
+  .outcome-banner--success & { color: #166534; }
+  .outcome-banner--error & { color: #991b1b; }
+}
+
+.outcome-desc {
+  font-size: 0.8125rem;
+  margin: 0;
+
+  .outcome-banner--success & { color: #15803d; }
+  .outcome-banner--error & { color: #b91c1c; }
+}
+
+// ─── Result details ─────────────────────────────────────────────────────────────
+.result-details {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+
+  & + & { border-top: 1px solid #eef2f7; }
+}
+
+.detail-label {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.detail-value {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1e293b;
+  text-align: right;
+  word-break: break-all;
+
+  &--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+}
+
 // ─── Footer ───────────────────────────────────────────────────────────────────
 .payment-footer {
   font-size: 0.75rem;
