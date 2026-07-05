@@ -15,6 +15,10 @@ export interface JwtResponse {
 export interface PaymentResultResponse {
   transactionId: string;
   status: 'SUCCESS' | 'FAILED';
+  partnerId: string;
+  amount: number;
+  currency: string;
+  orderReference: string;
   errorCode: string;
   errorMessage: string;
   maskedPan: string;

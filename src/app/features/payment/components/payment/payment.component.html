@@ -21,6 +21,14 @@
       </div>
     </div>
 
+    <!-- Amount due — always visible once the link params are read -->
+    @if (amount() != null) {
+      <div class="amount-due">
+        <span class="amount-due__label">Amount</span>
+        <span class="amount-due__value">{{ amount() | currency:currency() }}</span>
+      </div>
+    }
+
 
     <!-- Payment outcome banner — shown after returning from Trust Payments -->
     @if (paidSuccess()) {
@@ -54,10 +62,6 @@
           </div>
         }
       </div>
-
-      <button class="btn btn-primary" (click)="startNewPayment()" type="button">
-        Make another payment
-      </button>
     }
 
     @if (paidFailure()) {
@@ -83,13 +87,15 @@
           <path d="M12 8v4M12 16h.01" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <div>
-          <p class="error-title">Payment form unavailable</p>
+          <p class="error-title">{{ errorTitle() }}</p>
           <p class="error-desc">{{ errorMessage() }}</p>
         </div>
       </div>
-      <button class="btn btn-secondary" (click)="retryInitialise()" type="button">
-        Try again
-      </button>
+      @if (!isLinkError()) {
+        <button class="btn btn-secondary" (click)="retryInitialise()" type="button">
+          Try again
+        </button>
+      }
     }
 
     @if (showForm()) {
@@ -141,11 +147,7 @@
             <span class="btn-spinner" aria-hidden="true"></span>
             Processing…
           } @else {
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.5C16.5 22.15 20 17.25 20 12V6L12 2Z"
-                stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-            </svg>
-            Pay {{ paymentConfig.CURRENCY }} {{ paymentConfig.AMOUNT | number:'1.2-2' }}
+            Pay {{ amount() | currency:currency() }}
           }
         </button>
 

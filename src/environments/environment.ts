@@ -6,5 +6,7 @@ export const environment = {
   // card-field iframes 404. Any other hostname works — trustpay.local maps to 127.0.0.1
   // via /etc/hosts. See README / setup notes.
   apiBaseUrl: 'http://trustpay.local:8080/api',
-  trustPaymentsCdnUrl: 'https://cdn.eu.trustpayments.com/js/latest/st.js'
+  trustPaymentsCdnUrl: 'https://cdn.eu.trustpayments.com/js/latest/st.js',
+  // 0 = Trust Payments TEST gateway. Must stay 0 for local/dev.
+  liveStatus: 0
 };
