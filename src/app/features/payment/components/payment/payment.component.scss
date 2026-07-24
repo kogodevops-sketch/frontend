@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 1rem;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #f4f3fb;
   background:
@@ -26,9 +26,9 @@
     0 1px 0 rgba(255, 255, 255, 0.05) inset,
     0 24px 60px -16px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(0, 0, 0, 0.25);
-  padding: 2rem;
+  padding: 1.5rem 1.6rem;
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
 }
 
 // ─── Header / logo ─────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.1rem;
 }
 
 .payment-logo {
@@ -86,8 +86,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0.85rem 1.1rem;
-  margin-bottom: 1.25rem;
+  padding: 0.7rem 1.1rem;
+  margin-bottom: 1rem;
   background: rgba(104, 68, 230, 0.08);
   border: 1px solid rgba(139, 120, 255, 0.18);
   border-radius: 14px;
@@ -98,7 +98,7 @@
   }
 
   &__value {
-    font-size: 1.55rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.01em;
@@ -126,16 +126,18 @@
 
 // ─── Trust Payments animated card ───────────────────────────────────────────────
 .tp-animated-card {
-  margin: 0 auto 1.4rem;
+  margin: 0 auto 0.5rem;
   display: flex;
   justify-content: center;
 
-  // st.js renders the animated card <iframe> here
+  // st.js renders the animated card <iframe> here — kept compact so it fits one screen
   iframe {
     width: 100%;
-    max-width: 340px;
+    max-width: 270px;
     border: none;
   }
+
+  &:empty { display: none; }   // no gap before st.js mounts the card
 }
 
 .tp-notification {
@@ -151,14 +153,14 @@
 }
 
 // ─── Form fields ──────────────────────────────────────────────────────────────
-.field-group { margin-bottom: 1rem; }
+.field-group { margin-bottom: 0.7rem; }
 
 .field-label {
   display: block;
   font-size: 0.8125rem;
   font-weight: 500;
   color: #9b98c0;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 .field-row {
@@ -189,7 +191,7 @@
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.95rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   border-radius: 14px;
   font-family: inherit;
   font-size: 0.9375rem;
@@ -197,7 +199,7 @@
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
-  margin-top: 0.5rem;
+  margin-top: 0.4rem;
 
   &:focus-visible { outline: 2px solid #a78bfa; outline-offset: 2px; }
 }
@@ -301,11 +303,11 @@
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 .payment-footer {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #6f6c93;
   text-align: center;
-  margin: 1rem 0 0;
-  line-height: 1.5;
+  margin: 0.7rem 0 0;
+  line-height: 1.45;
 }
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
