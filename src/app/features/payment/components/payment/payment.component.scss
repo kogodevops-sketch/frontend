@@ -126,15 +126,13 @@
 
 // ─── Trust Payments animated card ───────────────────────────────────────────────
 .tp-animated-card {
-  margin: 0 auto 0.5rem;
-  display: flex;
-  justify-content: center;
+  margin: 0 auto 0.85rem;
 
-  // st.js renders the animated card <iframe> here — kept compact so it fits one screen
+  // st.js renders the animated card <iframe> here — full width so it fills nicely (no gap)
   iframe {
     width: 100%;
-    max-width: 270px;
     border: none;
+    display: block;
   }
 
   &:empty { display: none; }   // no gap before st.js mounts the card

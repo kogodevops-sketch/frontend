@@ -39,13 +39,15 @@ interface SecureTradingConfig {
 // input text renders dark and is invisible on our dark input backgrounds.
 const TP_DARK_STYLES: Record<string, string> = {
   'font-size-input': '15px',
-  'font-family-input': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  'font-family-input': "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   'color-input': '#f1f5f9',
-  'color-input-placeholder': '#64748b',
+  'color-input-placeholder': '#5b5878',
   'background-color-input': 'transparent',
   'space-inset-input': '13px 14px',
   'color-input-error': '#f87171',
-  'color-label': '#94a3b8',
+  // Hide st.js's own field labels — we render our own labels outside the iframes,
+  // so this stops "Card number / Expiration date / Security code" showing twice.
+  'display-label': 'none',
 };
 
 interface SecureTradingInstance {
