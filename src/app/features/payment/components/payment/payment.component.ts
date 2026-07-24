@@ -300,7 +300,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     const st = window.SecureTrading({
       jwt,
       livestatus: environment.liveStatus,
-      animatedCard: false,
+      animatedCard: true,
       panIcon: true,
       submitOnSuccess: true,
       submitOnError: true,
