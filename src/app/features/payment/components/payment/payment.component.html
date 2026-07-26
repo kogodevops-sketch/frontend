@@ -2,31 +2,49 @@
 <div class="payment-page">
   <div class="payment-card">
 
-    <!-- Header -->
+    <!-- Header (maroon band) -->
     <div class="payment-header">
       <div class="payment-logo">
         <span class="logo-mark" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M14.5 6l-6 6 6 6" stroke="#fff" stroke-width="2.4"
-              stroke-linecap="round" stroke-linejoin="round"/>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 1.5c.7 4.4 2.6 6.3 7 7-4.4.7-6.3 2.6-7 7-.7-4.4-2.6-6.3-7-7 4.4-.7 6.3-2.6 7-7z"
+              fill="url(#kogo-spark)"/>
+            <defs>
+              <linearGradient id="kogo-spark" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ffb38a"/>
+                <stop offset="0.5" stop-color="#ff6a88"/>
+                <stop offset="1" stop-color="#b06bff"/>
+              </linearGradient>
+            </defs>
           </svg>
         </span>
-        <span class="payment-brand">Kogo<span class="brand-accent"> pay</span></span>
+        <span class="payment-brand">Kogo<span class="brand-accent">PAY</span></span>
       </div>
       <div class="secure-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.5C16.5 22.15 20 17.25 20 12V6L12 2Z"
-            fill="#16a34a" fill-opacity="0.15" stroke="#16a34a" stroke-width="1.5"/>
-          <path d="M9 12l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6"/>
         </svg>
-        <span>SSL Secured</span>
+        <span>Secure</span>
       </div>
     </div>
+
+    <!-- Breadcrumb band -->
+    <div class="payment-breadcrumb">
+      <span>{{ partnerId() || 'Partner' }}</span>
+      <span class="crumb-sep">→</span>
+      <span class="crumb-strong">KogoPay</span>
+      <span class="crumb-sep">→</span>
+      <span>Trust Payments</span>
+    </div>
+
+    <!-- Body -->
+    <div class="payment-body">
 
     <!-- Amount due — always visible once the link params are read -->
     @if (amount() != null) {
       <div class="amount-due">
-        <span class="amount-due__label">Amount</span>
+        <span class="amount-due__label">Amount due</span>
         <span class="amount-due__value">{{ amount() | currency:currency() }}</span>
       </div>
     }
@@ -104,12 +122,12 @@
     <!-- Loading JWT / st.js skeleton -->
     @if (isLoading() && !isFormRendered()) {
       <div class="skeleton-wrapper" aria-label="Loading payment form">
+        <div class="skeleton skeleton-animated-card"></div>
         <div class="skeleton skeleton-input"></div>
         <div class="skeleton-row">
           <div class="skeleton skeleton-input-half"></div>
           <div class="skeleton skeleton-input-half"></div>
         </div>
-        <div class="skeleton skeleton-animated-card"></div>
       </div>
     }
 
@@ -135,11 +153,11 @@
 
         <div class="field-row">
           <div class="field-group">
-            <label class="field-label">Expiry date</label>
+            <label class="field-label">Expiry</label>
             <div id="st-expiration-date" class="tp-iframe-container"></div>
           </div>
           <div class="field-group">
-            <label class="field-label">Security code</label>
+            <label class="field-label">CVV</label>
             <div id="st-security-code" class="tp-iframe-container"></div>
           </div>
         </div>
@@ -159,11 +177,13 @@
       </form>
 
       <p class="payment-footer">
-        Your payment is processed securely by Trust Payments.
-        Card details are never sent to our servers.
+        <span class="footer-line">PCI-DSS card capture · processed by Trust Payments</span>
+        KogoPay does not store your card number.
       </p>
     </div>
     }
+
+    </div><!-- /.payment-body -->
 
   </div>
 </div>

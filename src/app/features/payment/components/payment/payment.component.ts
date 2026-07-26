@@ -35,16 +35,16 @@ interface SecureTradingConfig {
   styles?: Record<string, string>;
 }
 
-// Dark-theme styling for the Trust Payments card-field iframes. Without this the
-// input text renders dark and is invisible on our dark input backgrounds.
+// Light-theme styling for the Trust Payments card-field iframes. Inputs are white,
+// so the typed text must be DARK (otherwise the card digits are invisible).
 const TP_DARK_STYLES: Record<string, string> = {
   'font-size-input': '15px',
   'font-family-input': "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  'color-input': '#f1f5f9',
-  'color-input-placeholder': '#5b5878',
+  'color-input': '#3a1f24',
+  'color-input-placeholder': '#b6a6a8',
   'background-color-input': 'transparent',
   'space-inset-input': '13px 14px',
-  'color-input-error': '#f87171',
+  'color-input-error': '#c0392b',
   // Hide st.js's own field labels — we render our own labels outside the iframes,
   // so this stops "Card number / Expiration date / Security code" showing twice.
   'display-label': 'none',
@@ -99,6 +99,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
   readonly amount = signal<number | null>(null);
   readonly currency = signal<string>('');
   readonly referenceId = signal<string>('');
+  readonly partnerId = signal<string>('');
 
   // Payment outcome shown inline after returning from Trust Payments (via /callback redirect)
   readonly outcome = signal<PaymentResultResponse | null>(null);
@@ -174,6 +175,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.amount.set(params.amount);
     this.currency.set(params.currency);
     this.referenceId.set(params.orderReference);
+    this.partnerId.set(params.partnerId);
   }
 
   private saveParams(params: PaymentParams): void {
