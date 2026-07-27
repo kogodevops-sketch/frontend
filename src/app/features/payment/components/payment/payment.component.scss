@@ -139,13 +139,15 @@
 
 // ─── Trust Payments animated card ───────────────────────────────────────────────
 .tp-animated-card {
-  margin: 0 auto 0.6rem;
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto 0.7rem;
+  aspect-ratio: 1.585 / 1;          // credit-card ratio — clips st.js's extra reserved height
+  overflow: hidden;
+  border-radius: 14px;
 
   iframe {
     width: 100%;
-    max-width: 300px;                 // keep the card prominent but short enough to fit one screen
     border: none;
     display: block;
   }
@@ -185,7 +187,8 @@
 .tp-iframe-container {
   border: 1.5px solid #e6d9da;
   border-radius: 12px;
-  min-height: 48px;
+  height: 50px;                     // fixed — clips st.js's empty validation-message area below the input
+  overflow: hidden;
   background: #ffffff;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
@@ -194,7 +197,7 @@
     box-shadow: 0 0 0 3px rgba(126, 31, 46, 0.14);
   }
 
-  iframe { width: 100%; min-height: 48px; border: none; display: block; }
+  iframe { width: 100%; border: none; display: block; }
 }
 
 // ─── Buttons ──────────────────────────────────────────────────────────────────
