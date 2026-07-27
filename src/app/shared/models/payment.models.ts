@@ -5,6 +5,7 @@ export interface JwtRequest {
   amount: number;
   currency: string;
   orderReference: string;
+  signature?: string;   // AIMS `sig` from the payment link (anti-tampering)
 }
 
 export interface JwtResponse {

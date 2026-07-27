@@ -75,6 +75,7 @@ interface PaymentParams {
   amount: number;          // amount
   currency: string;        // currency
   orderReference: string;  // reference_id
+  signature?: string;      // sig — AIMS HMAC signature (anti-tampering)
 }
 
 // Persist the link params across the callback round-trip (the backend redirect
@@ -162,6 +163,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     const amountRaw      = qp.get('amount')?.trim();
     const currency       = qp.get('currency')?.trim().toUpperCase();
     const orderReference = qp.get('reference_id')?.trim();
+    const signature      = qp.get('sig')?.trim() || undefined;   // AIMS anti-tampering signature
 
     if (!partnerId || !amountRaw || !currency || !orderReference) {
       return null;
@@ -175,7 +177,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    return { partnerId, amount, currency, orderReference };
+    return { partnerId, amount, currency, orderReference, signature };
   }
 
   private applyParams(params: PaymentParams): void {
@@ -279,7 +281,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
           partnerId:      params.partnerId,
           amount:         params.amount,
           currency:       params.currency,
-          orderReference: params.orderReference
+          orderReference: params.orderReference,
+          signature:      params.signature
         })
         .toPromise() as { jwt: string; transactionId: string };
 
