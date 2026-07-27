@@ -43,8 +43,15 @@ const TP_DARK_STYLES: Record<string, string> = {
   'color-input': '#3a1f24',
   'color-input-placeholder': '#b6a6a8',
   'background-color-input': 'transparent',
-  'space-inset-input': '13px 14px',
+  'space-inset-input': '14px 14px',
   'color-input-error': '#c0392b',
+  // Let OUR container provide the single, consistent outline — remove st.js's own
+  // input border/outline so an empty required field doesn't flash an alarming red box.
+  'border-size-input': '0',
+  'border-size-input-error': '0',
+  'outline-input': 'none',
+  'box-shadow-input': 'none',
+  'box-shadow-input-error': 'none',
   // Hide st.js's own field labels — we render our own labels outside the iframes,
   // so this stops "Card number / Expiration date / Security code" showing twice.
   'display-label': 'none',

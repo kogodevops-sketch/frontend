@@ -140,11 +140,11 @@
 // ─── Trust Payments animated card ───────────────────────────────────────────────
 .tp-animated-card {
   width: 100%;
-  max-width: 360px;
-  margin: 0 auto 0.7rem;
-  aspect-ratio: 1.585 / 1;          // credit-card ratio — clips st.js's extra reserved height
+  max-width: 340px;
+  margin: 0 auto 0.9rem;
+  aspect-ratio: 1.5 / 1;            // matches st.js's card so it isn't clipped; hides its extra reserve
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 16px;
 
   iframe {
     width: 100%;
