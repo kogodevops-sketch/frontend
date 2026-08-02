@@ -38,7 +38,11 @@ interface SecureTradingConfig {
 // Light-theme styling for the Trust Payments card-field iframes. Inputs are white,
 // so the typed text must be DARK (otherwise the card digits are invisible).
 const TP_DARK_STYLES: Record<string, string> = {
-  'font-size-input': '15px',
+  // 16px, not 15: below 16px iOS Safari auto-zooms the page when an input gains
+  // focus, so tapping the card number would zoom in and force the user to pinch
+  // back out mid-payment. The iframe styles can't carry a media query, so this
+  // applies everywhere — a 1px difference on desktop is worth the mobile fix.
+  'font-size-input': '16px',
   'font-family-input': "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   'color-input': '#3a1f24',
   'color-input-placeholder': '#b6a6a8',

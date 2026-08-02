@@ -176,12 +176,23 @@
   font-weight: 500;
   color: #6b5457;
   margin-bottom: 0.28rem;
+  // Keep side-by-side fields aligned when one label wraps to a second line:
+  // the label box always reserves the same height, so both inputs start level.
+  min-height: 1.15rem;
+  line-height: 1.15rem;
 }
 
 .field-row {
   display: flex;
   gap: 0.75rem;
-  .field-group { flex: 1; }
+
+  .field-group {
+    flex: 1;
+    // Without this a flex item won't shrink below its intrinsic content width
+    // (min-width defaults to auto). <input type="date"> is intrinsically wide on
+    // iOS, so the DOB field used to overflow and sit under the next column.
+    min-width: 0;
+  }
 }
 
 // Our own text inputs (Visa billing fields) — matched to the st.js iframe fields.
@@ -204,6 +215,16 @@
     outline: none;
     border-color: #a83a4a;
     box-shadow: 0 0 0 3px rgba(126, 31, 46, 0.14);
+  }
+
+  // iOS renders date inputs with its own chrome and an intrinsic width that
+  // ignores the container; normalise so it matches the other fields exactly.
+  &[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    // Empty date inputs collapse their text baseline on iOS without this.
+    display: block;
   }
 }
 
@@ -357,3 +378,70 @@
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 .hidden { display: none !important; }
+
+// ─── Mobile ───────────────────────────────────────────────────────────────────
+// Phones get a single-column form: two columns on a ~390px screen leaves each
+// field too narrow to read or tap comfortably, and any label that wraps throws
+// the row out of alignment.
+@media (max-width: 540px) {
+  .payment-page {
+    padding: 0.5rem;
+    align-items: flex-start;      // long form should start at the top, not centre
+  }
+
+  .payment-card {
+    max-width: 100%;
+    border-radius: 18px;
+  }
+
+  .payment-header    { padding: 0.7rem 1rem; }
+  .payment-breadcrumb { padding: 0.4rem 1rem; }
+  .payment-body      { padding: 0.9rem 1rem 1rem; }
+
+  .amount-due {
+    margin-bottom: 0.85rem;
+    &__value { font-size: 1.45rem; }
+  }
+
+  // Stack the paired fields; each .field-group keeps its own bottom margin,
+  // so the row gap is no longer needed.
+  .field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  // Stacked labels don't need to line up with a neighbour, so let them size
+  // naturally instead of reserving a fixed height.
+  .field-label {
+    min-height: 0;
+  }
+
+  // 16px is the threshold below which iOS Safari auto-zooms the page on focus —
+  // on a payment form that means every tap zooms in and the user has to pinch
+  // back out. Applies to our inputs; the card iframes are handled in the st.js
+  // styles config (see TP_DARK_STYLES in payment.component.ts).
+  .text-input {
+    font-size: 16px;
+    height: 48px;
+  }
+
+  .btn {
+    padding: 0.85rem 1.25rem;
+    font-size: 1rem;              // comfortable tap target
+  }
+
+  .tp-animated-card {
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .payment-footer { font-size: 0.7rem; }
+}
+
+// Very narrow phones (e.g. iPhone SE) — reclaim a little more horizontal space.
+@media (max-width: 360px) {
+  .payment-page      { padding: 0.35rem; }
+  .payment-header    { padding: 0.65rem 0.8rem; }
+  .payment-breadcrumb { padding: 0.35rem 0.8rem; font-size: 0.7rem; }
+  .payment-body      { padding: 0.8rem 0.8rem 0.9rem; }
+}
