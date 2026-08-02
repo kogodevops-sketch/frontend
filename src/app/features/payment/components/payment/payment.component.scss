@@ -184,6 +184,35 @@
   .field-group { flex: 1; }
 }
 
+// Our own text inputs (Visa billing fields) — matched to the st.js iframe fields.
+.text-input {
+  width: 100%;
+  height: 50px;
+  box-sizing: border-box;
+  border: 1.5px solid #e6d9da;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0 14px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #3a1f24;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder { color: #b6a6a8; }
+
+  &:focus {
+    outline: none;
+    border-color: #a83a4a;
+    box-shadow: 0 0 0 3px rgba(126, 31, 46, 0.14);
+  }
+}
+
+.field-error {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 0.78rem;
+  color: #c0392b;
+}
+
 .tp-iframe-container {
   border: 1.5px solid #e6d9da;
   border-radius: 12px;

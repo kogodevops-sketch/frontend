@@ -82,6 +82,22 @@ interface PaymentParams {
 // only carries transactionId, so we stash the originals to allow a failure retry).
 const PARAMS_STORAGE_KEY = 'kogopay.paymentParams';
 
+// Persist the customer's billing details so a retry can pre-fill them instead of
+// asking again from scratch.
+const BILLING_STORAGE_KEY = 'kogopay.billingDetails';
+
+interface BillingDetails {
+  firstName: string;
+  lastName: string;
+  country: string;
+  accountNumber: string;
+  dob: string;
+  postcode: string;
+  premise: string;
+  street: string;
+  town: string;
+}
+
 @Component({
   selector: 'app-payment',
   standalone: true,
@@ -102,6 +118,21 @@ export class PaymentComponent implements OnInit, OnDestroy {
   readonly isLinkError = signal<boolean>(false);
   readonly isFormValid = signal<boolean>(false);
   readonly isFormRendered = signal<boolean>(false);
+
+  // Billing details — collected on this page for EVERY card (not just Visa), required by
+  // Trust Payments' MCC 4829 (Money Transfer) rules. Shown before the card form; the card
+  // form only initialises once these are submitted.
+  readonly billingDetailsSubmitted = signal<boolean>(false);
+  readonly billingFirstName = signal<string>('');
+  readonly billingLastName = signal<string>('');
+  readonly billingCountry = signal<string>('');
+  readonly billingAccountNumber = signal<string>('');
+  readonly billingDob = signal<string>('');
+  readonly billingPostcode = signal<string>('');
+  readonly billingPremise = signal<string>('');
+  readonly billingStreet = signal<string>('');
+  readonly billingTown = signal<string>('');
+  readonly billingError = signal<string | null>(null);
 
   // Values taken from the payment link, shown in the UI (e.g. the Pay button)
   readonly amount = signal<number | null>(null);
@@ -125,8 +156,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
   // Show the card form unless the payment already succeeded, or the link was invalid.
   readonly showForm = computed(() => !this.paidSuccess() && !this.isLinkError());
 
+  // Bounds for the date-of-birth picker: no future dates, and a sane floor so a stray
+  // year like 0202 (an easy typo in a date input) is caught before it reaches the gateway.
+  readonly maxDob = new Date().toISOString().slice(0, 10);
+  readonly minDob = '1900-01-01';
+
   // Stored transactionId returned by /initiate, used to build the callback URL
   private transactionId: string | null = null;
+
+  // Link params held while we wait for the billing-details step to be submitted.
+  private linkParams: PaymentParams | null = null;
 
   async ngOnInit(): Promise<void> {
     const qp = this.route.snapshot.queryParamMap;
@@ -147,7 +186,11 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     this.applyParams(params);
     this.saveParams(params);
-    await this.initialisePaymentForm(params);
+
+    // Don't initialise st.js yet — collect billing details first (required in every
+    // /initiate call). submitBillingDetails() drives the next step.
+    this.linkParams = params;
+    this.prefillBillingDetails();
   }
 
   ngOnDestroy(): void {
@@ -212,13 +255,95 @@ export class PaymentComponent implements OnInit, OnDestroy {
     );
   }
 
+  // ── Billing details step ────────────────────────────────────────────────────
+
+  private saveBillingDetails(details: BillingDetails): void {
+    try { sessionStorage.setItem(BILLING_STORAGE_KEY, JSON.stringify(details)); } catch { /* ignore */ }
+  }
+
+  private readSavedBillingDetails(): BillingDetails | null {
+    try {
+      const raw = sessionStorage.getItem(BILLING_STORAGE_KEY);
+      return raw ? JSON.parse(raw) as BillingDetails : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private prefillBillingDetails(): void {
+    const saved = this.readSavedBillingDetails();
+    if (saved) {
+      this.billingFirstName.set(saved.firstName);
+      this.billingLastName.set(saved.lastName);
+      this.billingCountry.set(saved.country);
+      this.billingAccountNumber.set(saved.accountNumber);
+      this.billingDob.set(saved.dob);
+      this.billingPostcode.set(saved.postcode);
+      this.billingPremise.set(saved.premise);
+      this.billingStreet.set(saved.street);
+      this.billingTown.set(saved.town);
+    }
+  }
+
+  /** Validates the mandatory billing fields, then initialises the payment form. */
+  async submitBillingDetails(): Promise<void> {
+    const firstName = this.billingFirstName().trim();
+    const lastName = this.billingLastName().trim();
+    const country = this.billingCountry().trim().toUpperCase();
+    const accountNumber = this.billingAccountNumber().trim();
+    const dob = this.billingDob().trim();
+    const postcode = this.billingPostcode().trim();
+    const premise = this.billingPremise().trim();
+    const street = this.billingStreet().trim();
+    const town = this.billingTown().trim();
+
+    if (!firstName || !lastName) {
+      this.billingError.set('Please enter your first and last name.');
+      return;
+    }
+    if (!/^[A-Z]{2}$/.test(country)) {
+      this.billingError.set('Please enter a valid 2-letter country code (e.g. GB, IN, US).');
+      return;
+    }
+    if (!accountNumber) {
+      this.billingError.set('Please enter your account number.');
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      this.billingError.set('Please enter your date of birth.');
+      return;
+    }
+    if (dob > this.maxDob) {
+      this.billingError.set('Date of birth cannot be in the future.');
+      return;
+    }
+    if (dob < this.minDob) {
+      this.billingError.set('Please enter a valid date of birth.');
+      return;
+    }
+    if (!premise || !street || !town || !postcode) {
+      this.billingError.set('Please complete your full billing address.');
+      return;
+    }
+    if (!this.linkParams) {
+      this.billingError.set('Something went wrong. Please refresh and try again.');
+      return;
+    }
+
+    this.billingError.set(null);
+    this.billingCountry.set(country);
+    this.saveBillingDetails({ firstName, lastName, country, accountNumber, dob, postcode, premise, street, town });
+    this.billingDetailsSubmitted.set(true);
+    await this.initialisePaymentForm(this.linkParams);
+  }
+
   // ── Outcome (return from Trust Payments) ────────────────────────────────────
 
   /**
    * Called when the browser returns from Trust Payments (via the backend /callback
    * 302 redirect to /pay?transactionId=...). Fetches the stored result and shows a
-   * success/failure banner. On failure we re-initialise the form (using the saved
-   * link params) so the user can retry inline.
+   * success/failure banner. On failure we show the billing-details step again
+   * (pre-filled) so the user can retry inline.
    */
   private async loadOutcome(transactionId: string): Promise<void> {
     this.status.set('LOADING_JWT');
@@ -231,16 +356,22 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.status.set('IDLE');
 
       // The result carries the original amount/currency so the UI can show it even
-      // if sessionStorage was lost (e.g. new tab). Prefer the result; fall back to storage.
+      // if sessionStorage was lost (e.g. new tab). Prefer the result for display, but
+      // carry the signature from saved params — the retry re-calls /initiate, which
+      // (with AIMS_VERIFY_REDIRECT on) requires the original `sig`. The result has no
+      // signature and the return URL only carries transactionId, so without this the
+      // retry is rejected as "invalid payment link".
+      const saved = this.readSavedParams();
       const params: PaymentParams | null =
         (result.amount != null && result.currency)
           ? {
               partnerId:      result.partnerId,
               amount:         result.amount,
               currency:       result.currency,
-              orderReference: result.orderReference
+              orderReference: result.orderReference,
+              signature:      saved?.signature
             }
-          : this.readSavedParams();
+          : saved;
 
       if (params) {
         this.applyParams(params);
@@ -252,9 +383,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Failed → offer an inline retry using the original link params.
+      // Failed → show the billing-details step again (pre-filled) so the customer can retry.
       if (params) {
-        await this.initialisePaymentForm(params);
+        this.linkParams = params;
+        this.billingDetailsSubmitted.set(false);
+        this.isFormRendered.set(false);
+        this.prefillBillingDetails();
       }
     } catch (error) {
       this.handleInitError(error);
@@ -275,14 +409,23 @@ export class PaymentComponent implements OnInit, OnDestroy {
       // Load st.js from CDN
       await this.loaderService.load();
 
-      // Request signed JWT from backend using the payment-link params
+      // Request signed JWT from backend using the payment-link params + billing details
       const { jwt, transactionId } = await this.paymentApiService
         .initiatePayment({
-          partnerId:      params.partnerId,
-          amount:         params.amount,
-          currency:       params.currency,
-          orderReference: params.orderReference,
-          signature:      params.signature
+          partnerId:         params.partnerId,
+          amount:            params.amount,
+          currency:          params.currency,
+          orderReference:    params.orderReference,
+          signature:         params.signature,
+          billingFirstName:      this.billingFirstName().trim(),
+          billingLastName:       this.billingLastName().trim(),
+          billingCountry:        this.billingCountry().trim().toUpperCase(),
+          customerAccountNumber: this.billingAccountNumber().trim(),
+          billingDob:            this.billingDob().trim(),
+          billingPostcode:       this.billingPostcode().trim(),
+          billingPremise:        this.billingPremise().trim(),
+          billingStreet:         this.billingStreet().trim(),
+          billingTown:           this.billingTown().trim()
         })
         .toPromise() as { jwt: string; transactionId: string };
 
@@ -368,9 +511,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
       this.showLinkError();
       return;
     }
+    // Reset to the billing-details step (pre-filled) rather than re-initialising directly.
+    this.linkParams = saved;
     this.isFormRendered.set(false);
     this.isFormValid.set(false);
+    this.billingDetailsSubmitted.set(false);
+    this.billingError.set(null);
+    this.status.set('IDLE');
+    this.errorMessage.set(null);
     this.applyParams(saved);
-    this.initialisePaymentForm(saved);
+    this.prefillBillingDetails();
   }
 }

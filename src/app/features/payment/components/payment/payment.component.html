@@ -107,8 +107,135 @@
     }
 
     @if (showForm()) {
+
+    <!-- Billing details — collected for EVERY card before the card form loads. Required by
+         Trust Payments' MCC 4829 (Money Transfer) rules; sent for all cards so the flow
+         doesn't depend on detecting the card brand. -->
+    @if (!billingDetailsSubmitted()) {
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="billing-first-name">First name</label>
+          <input
+            id="billing-first-name"
+            type="text"
+            class="text-input"
+            autocomplete="given-name"
+            [value]="billingFirstName()"
+            (input)="billingFirstName.set($any($event.target).value)" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="billing-last-name">Last name</label>
+          <input
+            id="billing-last-name"
+            type="text"
+            class="text-input"
+            autocomplete="family-name"
+            [value]="billingLastName()"
+            (input)="billingLastName.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="billing-dob">Date of birth</label>
+          <input
+            id="billing-dob"
+            type="date"
+            class="text-input"
+            autocomplete="bday"
+            [max]="maxDob"
+            [min]="minDob"
+            [value]="billingDob()"
+            (input)="billingDob.set($any($event.target).value)" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="billing-country">Country</label>
+          <input
+            id="billing-country"
+            type="text"
+            class="text-input"
+            autocomplete="country"
+            maxlength="2"
+            placeholder="e.g. GB, IN, US"
+            [value]="billingCountry()"
+            (input)="billingCountry.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="billing-premise">Premise (house/building no.)</label>
+          <input
+            id="billing-premise"
+            type="text"
+            class="text-input"
+            autocomplete="address-line1"
+            [value]="billingPremise()"
+            (input)="billingPremise.set($any($event.target).value)" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="billing-street">Street</label>
+          <input
+            id="billing-street"
+            type="text"
+            class="text-input"
+            autocomplete="address-line2"
+            [value]="billingStreet()"
+            (input)="billingStreet.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="billing-town">Town</label>
+          <input
+            id="billing-town"
+            type="text"
+            class="text-input"
+            autocomplete="address-level2"
+            [value]="billingTown()"
+            (input)="billingTown.set($any($event.target).value)" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="billing-postcode">Postcode</label>
+          <input
+            id="billing-postcode"
+            type="text"
+            class="text-input"
+            autocomplete="postal-code"
+            [value]="billingPostcode()"
+            (input)="billingPostcode.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="billing-account-number">Account number</label>
+        <input
+          id="billing-account-number"
+          type="text"
+          class="text-input"
+          autocomplete="off"
+          placeholder="Your account number"
+          [value]="billingAccountNumber()"
+          (input)="billingAccountNumber.set($any($event.target).value)"
+          (keyup.enter)="submitBillingDetails()" />
+      </div>
+
+      @if (billingError()) {
+        <p class="field-error">{{ billingError() }}</p>
+      }
+
+      <button type="button" class="btn btn-primary" (click)="submitBillingDetails()">
+        Continue to payment
+      </button>
+    }
+
     <!-- Loading JWT / st.js skeleton -->
-    @if (isLoading() && !isFormRendered()) {
+    @if (billingDetailsSubmitted() && isLoading() && !isFormRendered()) {
       <div class="skeleton-wrapper" aria-label="Loading payment form">
         <div class="skeleton skeleton-animated-card"></div>
         <div class="skeleton skeleton-input"></div>
@@ -119,8 +246,9 @@
       </div>
     }
 
-    <!-- Trust Payments form — always in DOM so st.js can mount iframes -->
-    <div [class.hidden]="hasError()">
+    <!-- Trust Payments form — always in DOM so st.js can mount iframes; hidden until
+         billing details are submitted. -->
+    <div [class.hidden]="hasError() || !billingDetailsSubmitted()">
 
 <!-- Notification frame for inline errors -->
       <div id="st-notification-frame" class="tp-notification"></div>
